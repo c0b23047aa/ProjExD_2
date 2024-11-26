@@ -31,7 +31,8 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
 
 def gameover(screen: pg.Surface) -> None:
     """
-    引数で与えられたSurfaceに「Game Over」の画面をblitする
+    ゲームオーバー時に，半透明の黒い画面上に「Game Over」と表示し，
+    泣いているこうかとん画像を貼り付ける関数
     引数：スクリーンSurface
     戻り値：なし
     """
@@ -51,6 +52,23 @@ def gameover(screen: pg.Surface) -> None:
     #中心座標を基準にblitする
     pg.display.update()
     time.sleep(5)  #5秒間表示
+
+
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    爆弾の10段階程度の大きさ，加速度を準備する関数
+    引数：なし
+    戻り値：10段階程度の加速度，大きさのリスト
+    """
+    bb_accs = [a for a in range(1, 11)]  #加速度のリスト
+    bb_imgs = []  #拡大爆弾Surfaceのリスト（空）
+    for r in range(1, 11):
+        #for文で10段階の大きさの爆弾Surfaceを追加する
+        bb_img = pg.Surface((20*r, 20*r)) 
+        pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
+        bb_img.set_colorkey((0, 0, 0))
+        bb_imgs.append(bb_img)
+    return bb_imgs, bb_accs
 
 
 def main():
@@ -76,8 +94,13 @@ def main():
         if kk_rct.colliderect(bb_rct):
             gameover(screen)  #ゲームオーバー
             return
+        bb_imgs, bb_accs = init_bb_imgs()
+        #10段階程度の大きさ，加速度のリストを呼び出す
+        avx = vx*bb_accs[min(tmr//500, 9)]
+        avy = vy*bb_accs[min(tmr//500, 9)]
+        bb_img = bb_imgs[min(tmr//500, 9)]
+        #tmrの値に応じて，リストから適切な要素を選択する
         screen.blit(bg_img, [0, 0]) 
-
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
         for key, tpl in DELTA.items():
@@ -89,7 +112,7 @@ def main():
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         screen.blit(kk_img, kk_rct)
-        bb_rct.move_ip(vx, vy)  #爆弾動く
+        bb_rct.move_ip(avx, avy)  #爆弾動く
         yoko, tate = check_bound(bb_rct)
         if not yoko:  #横にはみ出る
             vx *= -1

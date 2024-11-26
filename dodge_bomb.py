@@ -36,7 +36,7 @@ def gameover(screen: pg.Surface) -> None:
     引数：スクリーンSurface
     戻り値：なし
     """
-    go_img = pg.Surface((WIDTH, HEIGHT))#黒半透明画像Surface
+    go_img = pg.Surface((WIDTH, HEIGHT))  #黒半透明画像Surface
     pg.draw.rect(go_img, (0, 0, 0), (0, 0, WIDTH, HEIGHT))
     go_img.set_alpha(200)  #画像の透明度設定
     go_rct = go_img.get_rect()
